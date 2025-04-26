@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
@@ -39,7 +40,7 @@ const App = () => {
   const [showBattleModal, setShowBattleModal] = useState(false);
   const [pokemon1, setPokemon1] = useState(null);
   const [pokemon2, setPokemon2] = useState(null);
-  const [opponentSearch, setOpponentSearch] = useState(''); // New state for opponent search input
+  const [opponentSearch, setOpponentSearch] = useState('');
   const [battleResult, setBattleResult] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [battleLog, setBattleLog] = useState([]);
@@ -49,7 +50,6 @@ const App = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 640);
   const limit = 20;
 
-  // Determine if the screen is small (< 640px)
   const updateScreenSize = () => {
     const width = window.innerWidth;
     const smallScreen = width < 640;
@@ -111,23 +111,23 @@ const App = () => {
 
   const fetchData = async () => {
     try {
-      const teamRes = await axios.get('http://localhost:3001/team');
-      const favoritesRes = await axios.get('http://localhost:3001/favorites');
-      const battleRes = await axios.get('http://localhost:3001/battleHistory');
+      const teamRes = await axios.get(`${import.meta.env.REACT_APP_API_URL}/team`);
+      const favoritesRes = await axios.get(`${import.meta.env.REACT_APP_API_URL}/favorites`);
+      const battleRes = await axios.get(`${import.meta.env.REACT_APP_API_URL}/battleHistory`);
       setTeam(teamRes.data || []);
       setFavorites(favoritesRes.data || []);
       setBattleHistory(battleRes.data || []);
     } catch (error) {
-      console.error('Error fetching data from json-server:', error.message);
-      setError(`Failed to fetch team, favorites, or battle data: ${error.message}. Ensure json-server is running at http://localhost:3001.`);
+      console.error('Error fetching data from backend:', error.message);
+      setError(`Failed to fetch team, favorites, or battle data: ${error.message}. Ensure the backend is running at ${import.meta.env.REACT_APP_API_URL}.`);
       setLastFailedAction('fetchData');
     }
   };
 
   const syncStateWithServer = async () => {
     try {
-      const teamRes = await axios.get('http://localhost:3001/team');
-      const favoritesRes = await axios.get('http://localhost:3001/favorites');
+      const teamRes = await axios.get(`${import.meta.env.REACT_APP_API_URL}/team`);
+      const favoritesRes = await axios.get(`${import.meta.env.REACT_APP_API_URL}/favorites`);
       setTeam(teamRes.data || []);
       setFavorites(favoritesRes.data || []);
       Swal.fire({
@@ -145,7 +145,7 @@ const App = () => {
       });
     } catch (error) {
       console.error('Error syncing state with server:', error.message);
-      setError(`Failed to sync state: ${error.message}. Ensure json-server is running.`);
+      setError(`Failed to sync state: ${error.message}. Ensure the backend is running at ${import.meta.env.REACT_APP_API_URL}.`);
       setLastFailedAction('syncStateWithServer');
     }
   };
@@ -193,15 +193,11 @@ const App = () => {
   const addToTeam = async (pokemon) => {
     if (team.length < 6 && !team.find((p) => p.pokeApiId === pokemon.id)) {
       try {
-        // Remove the id field to let json-server assign a new one
         const pokemonToAdd = { ...pokemon, pokeApiId: pokemon.id };
-        delete pokemonToAdd.id; // Remove the PokeAPI id field to avoid conflicts
+        delete pokemonToAdd.id;
         console.log('Adding to team with pokeApiId:', pokemonToAdd.pokeApiId, 'Name:', pokemonToAdd.name);
-
-        const response = await axios.post('http://localhost:3001/team', pokemonToAdd);
+        const response = await axios.post(`${import.meta.env.REACT_APP_API_URL}/team`, pokemonToAdd);
         console.log('Server response after adding to team:', response.data);
-
-        // Use the server-assigned id and retain pokeApiId for reference
         const savedPokemon = { ...pokemonToAdd, id: response.data.id };
         const newTeam = [...team, savedPokemon];
         setTeam(newTeam);
@@ -221,7 +217,7 @@ const App = () => {
         });
       } catch (error) {
         console.error('Error adding to team:', error.message);
-        setError(`Failed to add to team: ${error.message}. Ensure json-server is running.`);
+        setError(`Failed to add to team: ${error.message}. Ensure the backend is running at ${import.meta.env.REACT_APP_API_URL}.`);
         setLastFailedAction('addToTeam');
         setLastFailedPokemon(pokemon);
       }
@@ -245,15 +241,11 @@ const App = () => {
   const addToFavorites = async (pokemon) => {
     if (!favorites.find((p) => p.pokeApiId === pokemon.id)) {
       try {
-        // Remove the id field to let json-server assign a new one
         const pokemonToAdd = { ...pokemon, pokeApiId: pokemon.id };
-        delete pokemonToAdd.id; // Remove the PokeAPI id field to avoid conflicts
+        delete pokemonToAdd.id;
         console.log('Adding to favorites with pokeApiId:', pokemonToAdd.pokeApiId, 'Name:', pokemonToAdd.name);
-
-        const response = await axios.post('http://localhost:3001/favorites', pokemonToAdd);
+        const response = await axios.post(`${import.meta.env.REACT_APP_API_URL}/favorites`, pokemonToAdd);
         console.log('Server response after adding to favorites:', response.data);
-
-        // Use the server-assigned id and retain pokeApiId for reference
         const savedPokemon = { ...pokemonToAdd, id: response.data.id };
         const newFavorites = [...favorites, savedPokemon];
         setFavorites(newFavorites);
@@ -273,7 +265,7 @@ const App = () => {
         });
       } catch (error) {
         console.error('Error adding to favorites:', error.message);
-        setError(`Failed to add to favorites: ${error.message}. Ensure json-server is running.`);
+        setError(`Failed to add to favorites: ${error.message}. Ensure the backend is running at ${import.meta.env.REACT_APP_API_URL}.`);
         setLastFailedAction('addToFavorites');
         setLastFailedPokemon(pokemon);
       }
@@ -508,35 +500,52 @@ const App = () => {
                 health2,
               });
             }
+            turn++;
           }
-
-          turn++;
         }
 
         winner = health1 > 0 ? pokemon1.name : pokemon2.name;
       }
 
-      const battleResult = {
-        pokemon1: pokemon1.name,
-        pokemon2: pokemon2.name,
-        winner: winner,
-        mode: battleMode,
-        date: new Date().toISOString(),
-      };
-
       setBattleLog(log);
       setCurrentTurn(0);
 
+      const battleResult = {
+        pokemon1: pokemon1.name,
+        pokemon2: pokemon2.name,
+        winner,
+        log,
+        mode: battleMode,
+        date: new Date().toISOString(),
+      };
+      setBattleResult(battleResult);
+
       try {
-        const response = await axios.post('http://localhost:3001/battleHistory', battleResult);
-        const savedBattle = response.data;
-        setBattleHistory([...battleHistory, savedBattle]);
-        setBattleResult(savedBattle);
+        const response = await axios.post(`${import.meta.env.REACT_APP_API_URL}/battleHistory`, battleResult);
+        console.log('Battle history saved:', response.data);
+        setBattleHistory([...battleHistory, response.data]);
       } catch (error) {
-        console.error('Error saving battle result:', error.message);
-        setError(`Failed to save battle result: ${error.message}. Ensure json-server is running.`);
+        console.error('Error saving battle history:', error.message);
+        setError(`Failed to save battle history: ${error.message}. Ensure the backend is running at ${import.meta.env.REACT_APP_API_URL}.`);
         setLastFailedAction('simulateBattle');
       }
+
+      Swal.fire({
+        title: `Battle Result`,
+        html: `<strong>${winner}</strong> wins the battle!`,
+        icon: 'info',
+        confirmButtonText: 'View Details',
+        confirmButtonColor: '#3b4cca',
+        background: '#fff',
+        customClass: {
+          popup: 'rounded-xl shadow-xl',
+          title: 'text-poke-blue font-2p',
+          htmlContainer: 'text-poke-blue',
+          confirmButton: 'px-6 py-2 text-white rounded-full shadow-md hover:bg-poke-blue-dark',
+        },
+      }).then(() => {
+        setShowHistory(true);
+      });
     } else {
       Swal.fire({
         title: 'Select Pokémon',
@@ -554,49 +563,10 @@ const App = () => {
     }
   };
 
-  const startRandomBattle = () => {
-    if (team.length < 1) {
-      Swal.fire({
-        title: 'Not Enough Pokémon',
-        text: 'You need at least one Pokémon in your team to start a battle!',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#3b4cca',
-        background: '#fff',
-        customClass: {
-          popup: 'rounded-xl shadow-xl',
-          title: 'text-poke-blue font-2p',
-          confirmButton: 'px-6 py-2 text-white rounded-full shadow-md hover:bg-poke-blue-dark',
-        },
-      });
-      return;
-    }
-    const randomTeamIndex = Math.floor(Math.random() * team.length);
-    const randomOpponentIndex = Math.floor(Math.random() * allPokemon.length);
-    setPokemon1(team[randomTeamIndex]);
-    setPokemon2(allPokemon[randomOpponentIndex]);
-    setOpponentSearch(allPokemon[randomOpponentIndex].name); // Update input field
-    Swal.fire({
-      title: 'Random Battle!',
-      html: `Selected <strong>${team[randomTeamIndex].name}</strong> vs <strong>${allPokemon[randomOpponentIndex].name}</strong>!`,
-      icon: 'info',
-      confirmButtonText: 'Ready!',
-      confirmButtonColor: '#ee6b2f',
-      background: '#fff',
-      customClass: {
-        popup: 'rounded-xl shadow-xl',
-        title: 'text-poke-blue font-2p',
-        htmlContainer: 'text-poke-blue',
-        confirmButton: 'px-6 py-2 text-white rounded-full shadow-md hover:bg-poke-red-dark',
-      },
-    });
-  };
-
   const removeFromBattleHistory = async (battleId) => {
     try {
-      const updatedHistory = battleHistory.filter((battle) => battle.id !== battleId);
-      setBattleHistory(updatedHistory);
-      await axios.delete(`http://localhost:3001/battleHistory/${battleId}`);
+      await axios.delete(`${import.meta.env.REACT_APP_API_URL}/battleHistory/${battleId}`);
+      setBattleHistory(battleHistory.filter((battle) => battle.id !== battleId));
       Swal.fire({
         title: 'Battle Removed',
         text: 'The battle has been removed from your history.',
@@ -612,597 +582,338 @@ const App = () => {
       });
     } catch (error) {
       console.error('Error removing battle from history:', error.message);
-      setError(`Failed to remove battle from history: ${error.response?.status === 404 ? 'Battle not found.' : error.message}. Ensure json-server is running at http://localhost:3001.`);
+      setError(`Failed to remove battle from history: ${error.message}. Ensure the backend is running at ${import.meta.env.REACT_APP_API_URL}.`);
       setLastFailedAction('removeFromBattleHistory');
-      fetchData();
     }
   };
 
-  const handleSelectPokemon = (pokemon) => {
+  const handleRetry = async () => {
+    if (!lastFailedAction) return;
+    setError(null);
+
+    switch (lastFailedAction) {
+      case 'fetchAllPokemon':
+        await fetchAllPokemon();
+        break;
+      case 'fetchPokemon':
+        await fetchPokemon();
+        break;
+      case 'fetchData':
+        await fetchData();
+        break;
+      case 'syncStateWithServer':
+        await syncStateWithServer();
+        break;
+      case 'addToTeam':
+        if (lastFailedPokemon) await addToTeam(lastFailedPokemon);
+        break;
+      case 'addToFavorites':
+        if (lastFailedPokemon) await addToFavorites(lastFailedPokemon);
+        break;
+      case 'simulateBattle':
+        await simulateBattle();
+        break;
+      case 'removeFromBattleHistory':
+        if (lastFailedPokemon) await removeFromBattleHistory(lastFailedPokemon);
+        break;
+      default:
+        break;
+    }
+
+    setLastFailedAction(null);
+    setLastFailedPokemon(null);
+  };
+
+  const handlePokemonClick = (pokemon) => {
     setSelectedPokemon(pokemon);
     setShowModal(true);
   };
 
-  const closeModal = () => {
+  const handleCloseModal = () => {
     setShowModal(false);
     setSelectedPokemon(null);
-    setPokemon2(null);
-    setOpponentSearch(''); // Reset opponent search
   };
 
-  const closeTeamModal = () => {
+  const handleCloseTeamModal = () => {
     setShowTeamModal(false);
   };
 
-  const closeFavoritesModal = () => {
+  const handleCloseFavoritesModal = () => {
     setShowFavoritesModal(false);
   };
 
-  const closeBattleModal = () => {
+  const handleCloseBattleModal = () => {
     setShowBattleModal(false);
     setPokemon1(null);
     setPokemon2(null);
-    setOpponentSearch(''); // Reset opponent search
+    setOpponentSearch('');
     setBattleResult(null);
-    setShowHistory(false);
     setBattleLog([]);
     setCurrentTurn(0);
     setPlayerMove('Tackle');
   };
 
-  const handleRetry = () => {
-    setError(null);
-    Swal.fire({
-      title: 'Retrying...',
-      text: 'Attempting to perform the action again!',
-      icon: 'info',
-      timer: 1500,
-      showConfirmButton: false,
-      background: '#fff',
-      customClass: {
-        popup: 'rounded-xl shadow-xl',
-        title: 'text-poke-blue font-2p',
-      },
-    });
-    switch (lastFailedAction) {
-      case 'fetchAllPokemon':
-        fetchAllPokemon();
-        break;
-      case 'fetchPokemon':
-        fetchPokemon();
-        break;
-      case 'fetchData':
-        fetchData();
-        break;
-      case 'addToTeam':
-        if (lastFailedPokemon) addToTeam(lastFailedPokemon);
-        break;
-      case 'addToFavorites':
-        if (lastFailedPokemon) addToFavorites(lastFailedPokemon);
-        break;
-      case 'simulateBattle':
-        simulateBattle();
-        break;
-      case 'removeFromBattleHistory':
-        fetchData();
-        break;
-      case 'removeFromTeam':
-      case 'removeFromFavorites':
-      case 'syncTeamAfterRemove':
-      case 'syncFavoritesAfterRemove':
-        syncStateWithServer();
-        break;
-      default:
-        fetchAllPokemon();
-        fetchPokemon();
-        fetchData();
+  const handleCloseHistory = () => {
+    setShowHistory(false);
+    setBattleResult(null);
+    setBattleLog([]);
+    setCurrentTurn(0);
+  };
+
+  const handleNextPage = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) setPage((prevPage) => prevPage - 1);
+  };
+
+  const handlePokemon1Select = (pokemon) => {
+    setPokemon1(pokemon);
+  };
+
+  const handlePokemon2Select = (pokemon) => {
+    setPokemon2(pokemon);
+  };
+
+  const handleOpponentSearch = (e) => {
+    const query = e.target.value.trim();
+    setOpponentSearch(query);
+  };
+
+  const handleBattleModeChange = (e) => {
+    setBattleMode(e.target.value);
+  };
+
+  const handleMoveChange = (e) => {
+    setPlayerMove(e.target.value);
+  };
+
+  const handleNextTurn = () => {
+    if (currentTurn < battleLog.length - 1) {
+      setCurrentTurn(currentTurn + 1);
     }
   };
 
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape' && showModal) {
-        closeModal();
-      } else if (e.key === 'Escape' && showTeamModal) {
-        closeTeamModal();
-      } else if (e.key === 'Escape' && showFavoritesModal) {
-        closeFavoritesModal();
-      } else if (e.key === 'Escape' && showBattleModal) {
-        closeBattleModal();
-      }
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [showModal, showTeamModal, showFavoritesModal, showBattleModal]);
-
-  useEffect(() => {
-    if (battleLog.length > 0 && currentTurn < battleLog.length) {
-      const timer = setTimeout(() => {
-        setCurrentTurn(currentTurn + 1);
-      }, 1000);
-      return () => clearTimeout(timer);
+  const handlePrevTurn = () => {
+    if (currentTurn > 0) {
+      setCurrentTurn(currentTurn - 1);
     }
-  }, [battleLog, currentTurn]);
-
-  if (error) {
-    return (
-      <div className="p-4 text-center text-red-500">
-        <p>{error}</p>
-        <button
-          onClick={handleRetry}
-          className="px-4 py-2 mt-4 text-white transition-colors bg-blue-500 rounded-lg hover:bg-blue-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div className="container min-h-screen p-4 mx-auto">
-      <h1 className="mb-4 text-4xl font-bold text-center text-poke-yellow drop-shadow-lg sm:text-5xl font-2p">Pokémon Mini Dex</h1>
-      <img src="/src/assets/pokedex.png" alt="Pokédex Logo" className="w-24 mx-auto mb-6 animate-bounce sm:w-32" />
-      <div className="flex flex-wrap justify-center gap-3 mt-4 mb-6">
-        <button
-          onClick={() => setShowTeamModal(true)}
-          className="flex-1 px-4 py-2 text-white transition-colors rounded-full shadow-md sm:flex-none bg-poke-blue hover:bg-poke-blue-dark sm:px-6 sm:py-3"
-        >
-          Your Team
-        </button>
-        <button
-          onClick={() => setShowFavoritesModal(true)}
-          className="flex-1 px-4 py-2 text-white transition-colors rounded-full shadow-md sm:flex-none bg-poke-purple hover:bg-poke-purple-dark sm:px-6 sm:py-3"
-        >
-          Favorites
-        </button>
-        <button
-          onClick={() => setShowBattleModal(true)}
-          className="flex-1 px-4 py-2 text-white transition-colors rounded-full shadow-md sm:flex-none bg-poke-green hover:bg-poke-green-dark sm:px-6 sm:py-3"
-        >
-          Start Battle
-        </button>
-      </div>
-      <input
-        type="text"
-        value={search}
-        onChange={handleSearch}
-        placeholder="Search Pokémon..."
-        className="w-full max-w-md p-2 mx-auto mb-6 border-2 rounded-lg shadow-sm border-poke-blue focus:outline-none focus:border-poke-yellow sm:p-3 sm:max-w-lg"
-      />
+    <div className="min-h-screen bg-poke-blue-light font-2p text-poke-blue">
+      <header className="p-4 text-center text-white bg-poke-blue-dark">
+        <h1 className="text-4xl font-bold">Pokémon Mini Dex</h1>
+        <div className="mt-2">
+          <button
+            onClick={() => setShowTeamModal(true)}
+            className="px-4 py-2 mr-2 text-white rounded-full bg-poke-green hover:bg-poke-green-dark"
+          >
+            My Team ({team.length}/6)
+          </button>
+          <button
+            onClick={() => setShowFavoritesModal(true)}
+            className="px-4 py-2 mr-2 text-white rounded-full bg-poke-purple hover:bg-poke-purple-dark"
+          >
+            Favorites ({favorites.length})
+          </button>
+          <button
+            onClick={() => setShowBattleModal(true)}
+            className="px-4 py-2 mr-2 text-white rounded-full bg-poke-red hover:bg-poke-red-dark"
+          >
+            Battle
+          </button>
+          <button
+            onClick={syncStateWithServer}
+            className="px-4 py-2 text-white rounded-full bg-poke-blue hover:bg-poke-blue-dark"
+          >
+            Sync State
+          </button>
+        </div>
+      </header>
 
-      {loading ? (
-        <div className="p-4 font-semibold text-center text-poke-blue">Loading...</div>
-      ) : (
-        <>
-          <PokemonList
-            pokemonList={pokemonList}
-            onSelectPokemon={handleSelectPokemon}
-            onAddToTeam={addToTeam}
-            onAddToFavorites={addToFavorites}
-            setPage={setPage}
-            page={page}
-            limit={limit}
-          />
-          {!isSmallScreen && !search && (
-            <div className="flex justify-center hidden gap-3 mt-6 sm:block">
+      <main className="p-4">
+        {error && (
+          <div className="relative px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
+            <span>{error}</span>
+            {lastFailedAction && (
               <button
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                onClick={handleRetry}
+                className="px-3 py-1 ml-2 text-white bg-red-500 rounded hover:bg-red-600"
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search Pokémon..."
+            value={search}
+            onChange={handleSearch}
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-poke-blue"
+          />
+        </div>
+
+        {loading ? (
+          <p className="text-center">Loading Pokémon...</p>
+        ) : (
+          <>
+            <PokemonList
+              pokemonList={pokemonList}
+              onPokemonClick={handlePokemonClick}
+              onAddToTeam={addToTeam}
+              onAddToFavorites={addToFavorites}
+              isSmallScreen={isSmallScreen}
+            />
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={handlePrevPage}
                 disabled={page === 1}
-                className="px-4 py-2 text-white transition-colors bg-gray-500 rounded-full shadow-md hover:bg-gray-600 disabled:opacity-50 sm:px-6 sm:py-3"
+                className={`px-4 py-2 rounded ${page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-poke-blue text-white hover:bg-poke-blue-dark'}`}
               >
                 Previous
               </button>
+              <span>Page {page}</span>
               <button
-                onClick={() => setPage((prev) => prev + 1)}
-                disabled={pokemonList.length < limit}
-                className="px-4 py-2 text-white transition-colors bg-gray-500 rounded-full shadow-md hover:bg-gray-600 disabled:opacity-50 sm:px-6 sm:py-3"
+                onClick={handleNextPage}
+                className="px-4 py-2 text-white rounded bg-poke-blue hover:bg-poke-blue-dark"
               >
                 Next
               </button>
             </div>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </main>
 
-      {team.length < 2 && (
-        <div className="mt-8 text-center text-poke-blue">
-          <p>Add at least 2 Pokémon to your team to unlock the Battle Arena!</p>
-        </div>
-      )}
-
-      {showModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={closeModal}
-        >
-          <div
-            className="relative w-11/12 max-w-md max-h-[90vh] p-4 bg-white shadow-xl rounded-xl sm:p-6 overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeModal}
-              className="absolute text-gray-600 transition-colors top-3 right-3 hover:text-gray-800"
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            <PokemonDetails pokemon={selectedPokemon} onAddToTeam={addToTeam} />
-            <div className="sticky bottom-0 pt-2 mt-4 text-center bg-white">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 text-white transition-colors bg-gray-500 rounded-full shadow-md hover:bg-gray-600 sm:px-6 sm:py-3"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+      {showModal && selectedPokemon && (
+        <PokemonDetails
+          pokemon={selectedPokemon}
+          onClose={handleCloseModal}
+          onAddToTeam={addToTeam}
+          onAddToFavorites={addToFavorites}
+          isSmallScreen={isSmallScreen}
+        />
       )}
 
       {showTeamModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={closeTeamModal}
-        >
-          <div
-            className="relative w-11/12 max-w-md max-h-[90vh] p-4 bg-white shadow-xl rounded-xl sm:p-6 overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeTeamModal}
-              className="absolute text-gray-600 transition-colors top-3 right-3 hover:text-gray-800"
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            <h2 className="mb-4 text-xl font-bold text-poke-blue sm:text-2xl">
-              Your Team ({team.length}/6)
-            </h2>
-            <Team
-              team={team}
-              setTeam={setTeam}
-              setError={setError}
-              setLastFailedAction={setLastFailedAction}
-              setLastFailedPokemon={setLastFailedPokemon}
-            />
-            <div className="sticky bottom-0 pt-2 mt-4 text-center bg-white">
-              <button
-                onClick={closeTeamModal}
-                className="px-4 py-2 text-white transition-colors bg-gray-500 rounded-full shadow-md hover:bg-gray-600 sm:px-6 sm:py-3"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <Team
+          team={team}
+          setTeam={setTeam}
+          onClose={handleCloseTeamModal}
+          isSmallScreen={isSmallScreen}
+        />
       )}
 
       {showFavoritesModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={closeFavoritesModal}
-        >
-          <div
-            className="relative w-11/12 max-w-md max-h-[90vh] p-4 bg-white shadow-xl rounded-xl sm:p-6 overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeFavoritesModal}
-              className="absolute text-gray-600 transition-colors top-3 right-3 hover:text-gray-800"
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            <h2 className="mb-4 text-xl font-bold text-poke-blue sm:text-2xl">
-              Favorites ({favorites.length})
-            </h2>
-            <Favorites
-              favorites={favorites}
-              setFavorites={setFavorites}
-              setError={setError}
-              setLastFailedAction={setLastFailedAction}
-              setLastFailedPokemon={setLastFailedPokemon}
-            />
-            <div className="sticky bottom-0 pt-2 mt-4 text-center bg-white">
-              <button
-                onClick={closeFavoritesModal}
-                className="px-4 py-2 text-white transition-colors bg-gray-500 rounded-full shadow-md hover:bg-gray-600 sm:px-6 sm:py-3"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <Favorites
+          favorites={favorites}
+          setFavorites={setFavorites}
+          onClose={handleCloseFavoritesModal}
+          isSmallScreen={isSmallScreen}
+        />
       )}
 
       {showBattleModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={closeBattleModal}
-        >
-          <div
-            className="relative w-11/12 max-w-md p-4 bg-white shadow-xl rounded-xl sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={closeBattleModal}
-              className="absolute text-gray-600 transition-colors top-3 right-3 hover:text-gray-800"
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            {!battleResult && !showHistory ? (
-              <div>
-                <h3 className="mb-4 text-xl font-bold text-center text-poke-blue sm:text-2xl">Select Pokémon to Battle</h3>
-                <div className="flex flex-col gap-4 mb-4 sm:flex-row">
-                  {/* Your Pokémon (from Team) */}
-                  <div className="flex-1">
-                    <label className="block mb-1 text-sm font-semibold text-gray-700 sm:mb-2 sm:text-base">Your Pokémon:</label>
-                    <select
-                      onChange={(e) => setPokemon1(team.find((p) => p.name === e.target.value))}
-                      value={pokemon1 ? pokemon1.name : ''}
-                      className="w-full p-2 text-sm border-2 rounded-lg shadow-sm border-poke-blue focus:outline-none focus:border-poke-yellow sm:p-3 sm:text-base"
-                    >
-                      <option value="">Select Your Pokémon</option>
-                      {team.map((pokemon) => (
-                        <option key={pokemon.id} value={pokemon.name}>
-                          {pokemon.name}
-                        </option>
-                      ))}
-                    </select>
-                    {pokemon1 && (
-                      <div className="mt-2 text-center">
-                        <img
-                          src={pokemon1.sprites.front_default}
-                          alt={pokemon1.name}
-                          className="w-20 h-20 mx-auto sm:w-24 sm:h-24"
-                        />
-                        <p className="mt-1 text-sm font-semibold capitalize text-poke-blue sm:text-base">{pokemon1.name}</p>
-                      </div>
-                    )}
-                  </div>
-                  {/* Opponent Pokémon (from PokeAPI) */}
-                  <div className="relative flex-1">
-                    <label className="block mb-1 text-sm font-semibold text-gray-700 sm:mb-2 sm:text-base">Opponent:</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder={allPokemon.length === 0 ? 'Loading Pokémon...' : 'Search for an opponent...'}
-                        value={opponentSearch}
-                        onChange={(e) => {
-                          const query = e.target.value;
-                          setOpponentSearch(query);
-                          const filtered = allPokemon.find((p) => p.name.toLowerCase() === query.toLowerCase());
-                          if (filtered) {
-                            setPokemon2(filtered);
-                          } else {
-                            setPokemon2(null); // Clear selection if no exact match
-                          }
-                        }}
-                        onFocus={() => {
-                          document.getElementById('opponent-dropdown').style.display = 'block';
-                        }}
-                        onBlur={() => {
-                          setTimeout(() => {
-                            document.getElementById('opponent-dropdown').style.display = 'none';
-                          }, 200);
-                        }}
-                        className="w-full p-2 text-sm border-2 rounded-lg shadow-sm border-poke-blue focus:outline-none focus:border-poke-yellow sm:p-3 sm:text-base"
-                        disabled={allPokemon.length === 0}
-                      />
-                      <div
-                        id="opponent-dropdown"
-                        className="absolute z-10 hidden w-full mt-1 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg max-h-48"
+        <Battle
+          allPokemon={allPokemon}
+          team={team}
+          onPokemon1Select={handlePokemon1Select}
+          onPokemon2Select={handlePokemon2Select}
+          opponentSearch={opponentSearch}
+          onOpponentSearch={handleOpponentSearch}
+          pokemon1={pokemon1}
+          pokemon2={pokemon2}
+          onBattle={simulateBattle}
+          onClose={handleCloseBattleModal}
+          battleMode={battleMode}
+          onBattleModeChange={handleBattleModeChange}
+          playerMove={playerMove}
+          onMoveChange={handleMove这句话Change}
+          isSmallScreen={isSmallScreen}
+        />
+      )}
+
+      {showHistory && battleResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+            <h2 className="mb-4 text-2xl font-bold text-poke-blue">Battle History</h2>
+            <p>
+              <strong>{battleResult.pokemon1}</strong> vs <strong>{battleResult.pokemon2}</strong>
+            </p>
+            <p>
+              <strong>Winner:</strong> {battleResult.winner}
+            </p>
+            <p>
+              <strong>Mode:</strong> {battleResult.mode === 'stat' ? 'Stat Comparison' : 'Damage Simulation'}
+            </p>
+            <p>
+              <strong>Date:</strong> {new Date(battleResult.date).toLocaleString()}
+            </p>
+            {battleLog.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold">Battle Log</h3>
+                {battleResult.mode === 'stat' ? (
+                  battleLog.map((logEntry) => (
+                    <p key={logEntry.round}>
+                      Round {logEntry.round} ({logEntry.stat}): {logEntry.winner} wins ({logEntry.value1} vs {logEntry.value2})
+                    </p>
+                  ))
+                ) : (
+                  <div>
+                    <p>
+                      Turn {battleLog[currentTurn].turn}: {battleLog[currentTurn].attacker} used {battleLog[currentTurn].move} on {battleLog[currentTurn].defender}
+                    </p>
+                    <p>Damage: {battleLog[currentTurn].damage}</p>
+                    <p>Effectiveness: {battleLog[currentTurn].effectiveness}x</p>
+                    <p>
+                      Health: {battleLog[currentTurn].health1} (P1) / {battleLog[currentTurn].health2} (P2)
+                    </p>
+                    <div className="flex justify-between mt-2">
+                      <button
+                        onClick={handlePrevTurn}
+                        disabled={currentTurn === 0}
+                        className={`px-4 py-2 rounded ${currentTurn === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-poke-blue text-white hover:bg-poke-blue-dark'}`}
                       >
-                        {allPokemon.length === 0 ? (
-                          <div className="p-2 text-center text-gray-500">Loading Pokémon...</div>
-                        ) : (
-                          allPokemon
-                            .filter((pokemon) =>
-                              pokemon.name.toLowerCase().includes(opponentSearch.toLowerCase())
-                            )
-                            .map((pokemon) => (
-                              <div
-                                key={pokemon.id}
-                                className="p-2 capitalize cursor-pointer hover:bg-gray-100"
-                                onMouseDown={() => {
-                                  setPokemon2(pokemon);
-                                  setOpponentSearch(pokemon.name); // Update input to show selected Pokémon's name
-                                  document.getElementById('opponent-dropdown').style.display = 'none';
-                                }}
-                              >
-                                {pokemon.name}
-                              </div>
-                            ))
-                        )}
-                      </div>
-                    </div>
-                    {pokemon2 && (
-                      <div className="mt-2 text-center">
-                        <img
-                          src={pokemon2.sprites.front_default}
-                          alt={pokemon2.name}
-                          className="w-20 h-20 mx-auto sm:w-24 sm:h-24"
-                        />
-                        <p className="mt-1 text-sm font-semibold capitalize text-poke-blue sm:text-base">{pokemon2.name}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-col items-center mb-4">
-                  <label className="block mb-1 text-sm font-semibold text-gray-700 sm:mb-2 sm:text-base">Battle Mode:</label>
-                  <select
-                    onChange={(e) => setBattleMode(e.target.value)}
-                    value={battleMode}
-                    className="w-full max-w-xs p-2 text-sm border-2 rounded-lg shadow-sm border-poke-blue focus:outline-none focus:border-poke-yellow sm:p-3 sm:text-base"
-                  >
-                    <option value="damage">Damage-Based Battle</option>
-                    <option value="stat">Stat Comparison Battle</option>
-                  </select>
-                </div>
-                {battleMode === 'damage' && (
-                  <div className="flex flex-col items-center mb-4">
-                    <label className="block mb-1 text-sm font-semibold text-gray-700 sm:mb-2 sm:text-base">Select Your Move:</label>
-                    <select
-                      onChange={(e) => setPlayerMove(e.target.value)}
-                      value={playerMove}
-                      className="w-full max-w-xs p-2 text-sm border-2 rounded-lg shadow-sm border-poke-blue focus:outline-none focus:border-poke-yellow sm:p-3 sm:text-base"
-                    >
-                      {moves.map((move) => (
-                        <option key={move.name} value={move.name}>
-                          {move.name} ({move.type})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <div className="flex flex-wrap justify-center gap-2">
-                  <button
-                    onClick={startRandomBattle}
-                    className="flex-1 px-4 py-2 text-sm text-white transition-colors rounded-full shadow-md sm:flex-none bg-poke-red hover:bg-poke-red-dark sm:px-6 sm:py-3 sm:text-base"
-                  >
-                    Random
-                  </button>
-                  <button
-                    onClick={simulateBattle}
-                    className="flex-1 px-4 py-2 text-sm text-white transition-colors rounded-full shadow-md sm:flex-none bg-poke-blue hover:bg-poke-blue-dark sm:px-6 sm:py-3 sm:text-base"
-                  >
-                    Start Battle
-                  </button>
-                  <button
-                    onClick={() => setShowHistory(true)}
-                    className="flex-1 px-4 py-2 text-sm text-white transition-colors rounded-full shadow-md sm:flex-none bg-poke-blue hover:bg-poke-blue-dark sm:px-6 sm:py-3 sm:text-base"
-                  >
-                    View History
-                  </button>
-                </div>
-              </div>
-            ) : !showHistory ? (
-              <div className="text-center">
-                <h3 className="mb-4 text-xl font-bold text-poke-blue sm:text-2xl">Battle Result</h3>
-                {currentTurn >= battleLog.length ? (
-                  <div className="mb-4">
-                    <div className="flex justify-center">
-                      <div className="p-4 bg-gray-100 rounded-lg shadow-md">
-                        <img
-                          src={battleResult.winner === pokemon1.name ? pokemon1.sprites.front_default : pokemon2.sprites.front_default}
-                          alt={battleResult.winner}
-                          className="w-20 h-20 mx-auto sm:w-24 sm:h-24"
-                        />
-                        <p className="font-semibold capitalize text-poke-blue">
-                          {battleResult.winner} wins!
-                        </p>
-                        <p>HP: {battleResult.winner === pokemon1.name ? pokemon1.stats[0].base_stat : pokemon2.stats[0].base_stat}</p>
-                        <p>Attack: {battleResult.winner === pokemon1.name ? pokemon1.stats[1].base_stat : pokemon2.stats[1].base_stat}</p>
-                        <p>Speed: {battleResult.winner === pokemon1.name ? pokemon1.stats[5].base_stat : pokemon2.stats[5].base_stat}</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    <div className="p-4 bg-gray-100 rounded-lg shadow-md">
-                      <img
-                        src={pokemon1.sprites.front_default}
-                        alt={pokemon1.name}
-                        className={`w-20 h-20 sm:w-24 sm:h-24 ${battleMode === 'damage' && battleLog[currentTurn - 1]?.defender === pokemon1.name ? 'animate-shake' : ''}`}
-                      />
-                      <p className="font-semibold capitalize text-poke-blue">{pokemon1.name}</p>
-                      <p>HP: {battleMode === 'damage' ? (battleLog[currentTurn - 1]?.health1 ?? pokemon1.stats[0].base_stat) : pokemon1.stats[0].base_stat}</p>
-                      <p>Attack: {pokemon1.stats[1].base_stat}</p>
-                      <p>Speed: {pokemon1.stats[5].base_stat}</p>
-                    </div>
-                    <span className="text-xl font-bold text-poke-red sm:text-2xl">VS</span>
-                    <div className="p-4 bg-gray-100 rounded-lg shadow-md">
-                      <img
-                        src={pokemon2.sprites.front_default}
-                        alt={pokemon2.name}
-                        className={`w-20 h-20 sm:w-24 sm:h-24 ${battleMode === 'damage' && battleLog[currentTurn - 1]?.defender === pokemon2.name ? 'animate-shake' : ''}`}
-                      />
-                      <p className="font-semibold capitalize text-poke-blue">{pokemon2.name}</p>
-                      <p>HP: {battleMode === 'damage' ? (battleLog[currentTurn - 1]?.health2 ?? pokemon2.stats[0].base_stat) : pokemon2.stats[0].base_stat}</p>
-                      <p>Attack: {pokemon2.stats[1].base_stat}</p>
-                      <p>Speed: {pokemon2.stats[5].base_stat}</p>
+                        Previous Turn
+                      </button>
+                      <button
+                        onClick={handleNextTurn}
+                        disabled={currentTurn === battleLog.length - 1}
+                        className={`px-4 py-2 rounded ${currentTurn === battleLog.length - 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-poke-blue text-white hover:bg-poke-blue-dark'}`}
+                      >
+                        Next Turn
+                      </button>
                     </div>
                   </div>
                 )}
-                <div className="p-4 mb-4 overflow-y-auto rounded-lg shadow-inner max-h-48 bg-gray-50">
-                  {battleMode === 'stat' ? (
-                    battleLog.slice(0, currentTurn).map((logEntry, index) => (
-                      <div key={index} className="mb-2">
-                        <p className="font-semibold text-poke-blue">Round {logEntry.round}: {logEntry.stat}</p>
-                        <p>{pokemon1.name}: {logEntry.value1} vs {pokemon2.name}: {logEntry.value2}</p>
-                        <p>Winner: {logEntry.winner}</p>
-                      </div>
-                    ))
-                  ) : (
-                    battleLog.slice(0, currentTurn).map((logEntry, index) => (
-                      <div key={index} className="mb-2">
-                        <p className="font-semibold text-poke-blue">{logEntry.attacker}</p>
-                        <p>{logEntry.attacker} used {logEntry.move} on {logEntry.defender}!</p>
-                        <p>Dealt {logEntry.damage} damage {logEntry.effectiveness !== 1 && `(Effectiveness: ${logEntry.effectiveness}x)`}.</p>
-                        <p>{logEntry.defender}'s HP: {logEntry.defender === pokemon1.name ? logEntry.health1 : logEntry.health2}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-                {currentTurn >= battleLog.length && (
-                  <div className="flex flex-wrap justify-center gap-2 mt-4">
-                    <button
-                      onClick={() => setShowHistory(true)}
-                      className="flex-1 px-4 py-2 text-sm text-white transition-colors rounded-full shadow-md sm:flex-none bg-poke-blue hover:bg-poke-blue-dark sm:px-6 sm:py-3 sm:text-base"
-                    >
-                      View History
-                    </button>
-                    <button
-                      onClick={closeBattleModal}
-                      className="flex-1 px-4 py-2 text-sm text-white transition-colors bg-gray-500 rounded-full shadow-md sm:flex-none hover:bg-gray-600 sm:px-6 sm:py-3 sm:text-base"
-                    >
-                      Close
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <h3 className="mt-4 mb-2 text-xl font-bold text-center text-poke-blue sm:mt-6 sm:text-2xl">Battle History</h3>
-                {battleHistory.length === 0 ? (
-                  <p className="text-center text-gray-600">No battle history available.</p>
-                ) : (
-                  <div className="p-4 overflow-y-auto rounded-lg shadow-inner max-h-48 bg-gray-50">
-                    {battleHistory.map((battle, index) => (
-                      <div key={battle.id} className="flex items-center justify-between p-2 mb-2 bg-white rounded-lg shadow-sm">
-                        <div>
-                          <p>{battle.pokemon1} vs {battle.pokemon2}</p>
-                          <p>Mode: {battle.mode === 'stat' ? 'Stat Comparison' : 'Damage-Based'}</p>
-                          <p>Winner: {battle.winner}</p>
-                          <p>Date: {new Date(battle.date).toLocaleString()}</p>
-                        </div>
-                        <button
-                          onClick={() => removeFromBattleHistory(battle.id)}
-                          className="px-3 py-1 text-sm text-white rounded-lg bg-poke-red hover:bg-poke-red-dark sm:px-4 sm:py-2 sm:text-base"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="flex flex-wrap justify-center gap-2 mt-4">
-                  <button
-                    onClick={() => setShowHistory(false)}
-                    className="flex-1 px-4 py-2 text-sm text-white transition-colors bg-gray-500 rounded-full shadow-md sm:flex-none hover:bg-gray-600 sm:px-6 sm:py-3 sm:text-base"
-                  >
-                    Hide History
-                  </button>
-                  <button
-                    onClick={closeBattleModal}
-                    className="flex-1 px-4 py-2 text-sm text-white transition-colors bg-gray-500 rounded-full shadow-md sm:flex-none hover:bg-gray-600 sm:px-6 sm:py-3 sm:text-base"
-                  >
-                    Close
-                  </button>
-                </div>
               </div>
             )}
+            <h3 className="mt-4 text-lg font-semibold">Past Battles</h3>
+            <ul className="mt-2 overflow-y-auto max-h-40">
+              {battleHistory.map((battle) => (
+                <li key={battle.id} className="flex items-center justify-between py-1">
+                  <span>
+                    {battle.pokemon1} vs {battle.pokemon2} - Winner: {battle.winner} ({battle.mode})
+                  </span>
+                  <button
+                    onClick={() => removeFromBattleHistory(battle.id)}
+                    className="px-2 py-1 text-white bg-red-500 rounded hover:bg-red-600"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={handleCloseHistory}
+              className="px-4 py-2 mt-4 text-white rounded bg-poke-blue hover:bg-poke-blue-dark"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
