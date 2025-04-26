@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: url('./assets/pokemon-forest-bg.jpeg') center center no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+  margin: 0 !important;
+  min-height: 100vh !important;
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.animate-shake {
+  animation: shake 0.3s;
+}
+
+/* Animation for diamond-like shining effect (kept in code but not applied to title) */
+@keyframes diamond-shine {
+  0% {
+    text-shadow: 0 0 5px rgba(255, 203, 5, 0.8), 0 0 10px rgba(255, 203, 5, 0.6), 0 0 15px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+    filter: brightness(1);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(255, 203, 5, 1), 0 0 20px rgba(255, 203, 5, 0.8), 0 0 30px rgba(255, 255, 255, 0.7), 0 0 40px rgba(255, 255, 255, 0.5);
+    filter: brightness(1.2);
+  }
+  100% {
+    text-shadow: 0 0 5px rgba(255, 203, 5, 0.8), 0 0 10px rgba(255, 203, 5, 0.6), 0 0 15px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+    filter: brightness(1);
+  }
+}
+
+/* Pokémon-specific styles with gradient applied to title */
+.text-poke-yellow {
+  background: linear-gradient(90deg, #ffcb05, #ffd700, #ffcb05);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-poke-blue {
+  color: #3b4cca; /* Pokémon blue */
+}
+
+.text-poke-red {
+  color: #ee6b2f; /* Pokémon red */
+}
+
+.bg-poke-blue {
+  background-color: #3b4cca;
+}
+
+.bg-poke-blue-dark {
+  background-color: #2a2e8e;
+}
+
+.bg-poke-green {
+  background-color: #78c850;
+}
+
+.bg-poke-green-dark {
+  background-color: #5a9a3c;
+}
+
+.bg-poke-red {
+  background-color: #ee6b2f;
+}
+
+.bg-poke-red-dark {
+  background-color: #c05626;
+}
+
+.bg-poke-purple {
+  background-color: #a848c8;
+}
+
+.bg-poke-purple-dark {
+  background-color: #7e369b;
+}
+
+.border-poke-blue {
+  border-color: #3b4cca;
+}
+
+.border-poke-yellow {
+  border-color: #ffcb05;
+}
+
+.drop-shadow-md {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.drop-shadow-lg {
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
+}
+
+.font-pokemon {
+  font-family: 'Pokemon', sans-serif;
+}
+
+.font-2p {
+  font-family: 'Press Start 2P', cursive;
+}
