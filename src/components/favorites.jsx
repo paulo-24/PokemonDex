@@ -25,8 +25,8 @@ const Favorites = ({ favorites, setFavorites, setError, setLastFailedAction, set
         return;
       }
 
-      console.log(`Sending DELETE request to http://localhost:3001/favorites/${pokemonId}`);
-      const response = await axios.delete(`http://localhost:3001/favorites/${pokemonId}`);
+      console.log(`Sending DELETE request to https://pokedex-api-l526.onrender.com/favorites/${pokemonId}`);
+      const response = await axios.delete(`https://pokedex-api-l526.onrender.com/favorites/${pokemonId}`);
       console.log('DELETE response:', response.data);
 
       const newFavorites = favorites.filter((pokemon) => pokemon.id !== pokemonId);
@@ -49,7 +49,7 @@ const Favorites = ({ favorites, setFavorites, setError, setLastFailedAction, set
 
       console.log('Resyncing favorites with server...');
       try {
-        const favoritesRes = await axios.get('http://localhost:3001/favorites');
+        const favoritesRes = await axios.get('https://pokedex-api-l526.onrender.com/favorites');
         setFavorites(favoritesRes.data || []);
         console.log('Favorites resynced:', favoritesRes.data);
       } catch (syncError) {
@@ -65,7 +65,7 @@ const Favorites = ({ favorites, setFavorites, setError, setLastFailedAction, set
 
       console.log('Resyncing favorites after failed deletion...');
       try {
-        const favoritesRes = await axios.get('http://localhost:3001/favorites');
+        const favoritesRes = await axios.get('https://pokedex-api-l526.onrender.com/favorites');
         setFavorites(favoritesRes.data || []);
         console.log('Favorites resynced after error:', favoritesRes.data);
       } catch (syncError) {
