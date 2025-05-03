@@ -111,23 +111,23 @@ const App = () => {
 
   const fetchData = async () => {
     try {
-      const teamRes = await axios.get('http://localhost:3001/team');
-      const favoritesRes = await axios.get('http://localhost:3001/favorites');
-      const battleRes = await axios.get('http://localhost:3001/battleHistory');
+      const teamRes = await axios.get('https://pokedex-api-l526.onrender.com/team');
+      const favoritesRes = await axios.get('https://pokedex-api-l526.onrender.com/favorites');
+      const battleRes = await axios.get('https://pokedex-api-l526.onrender.com/battleHistory');
       setTeam(teamRes.data || []);
       setFavorites(favoritesRes.data || []);
       setBattleHistory(battleRes.data || []);
     } catch (error) {
       console.error('Error fetching data from json-server:', error.message);
-      setError(`Failed to fetch team, favorites, or battle data: ${error.message}. Ensure json-server is running at http://localhost:3001.`);
+      setError(`Failed to fetch team, favorites, or battle data: ${error.message}. Ensure json-server is running at https://pokedex-api-l526.onrender.com.`);
       setLastFailedAction('fetchData');
     }
   };
 
   const syncStateWithServer = async () => {
     try {
-      const teamRes = await axios.get('http://localhost:3001/team');
-      const favoritesRes = await axios.get('http://localhost:3001/favorites');
+      const teamRes = await axios.get('https://pokedex-api-l526.onrender.com/team');
+      const favoritesRes = await axios.get('https://pokedex-api-l526.onrender.com/favorites');
       setTeam(teamRes.data || []);
       setFavorites(favoritesRes.data || []);
       Swal.fire({
@@ -198,7 +198,7 @@ const App = () => {
         delete pokemonToAdd.id; // Remove the PokeAPI id field to avoid conflicts
         console.log('Adding to team with pokeApiId:', pokemonToAdd.pokeApiId, 'Name:', pokemonToAdd.name);
 
-        const response = await axios.post('http://localhost:3001/team', pokemonToAdd);
+        const response = await axios.post('https://pokedex-api-l526.onrender.com/team', pokemonToAdd);
         console.log('Server response after adding to team:', response.data);
 
         // Use the server-assigned id and retain pokeApiId for reference
@@ -250,7 +250,7 @@ const App = () => {
         delete pokemonToAdd.id; // Remove the PokeAPI id field to avoid conflicts
         console.log('Adding to favorites with pokeApiId:', pokemonToAdd.pokeApiId, 'Name:', pokemonToAdd.name);
 
-        const response = await axios.post('http://localhost:3001/favorites', pokemonToAdd);
+        const response = await axios.post('https://pokedex-api-l526.onrender.com/favorites', pokemonToAdd);
         console.log('Server response after adding to favorites:', response.data);
 
         // Use the server-assigned id and retain pokeApiId for reference
@@ -528,7 +528,7 @@ const App = () => {
       setCurrentTurn(0);
 
       try {
-        const response = await axios.post('http://localhost:3001/battleHistory', battleResult);
+        const response = await axios.post('https://pokedex-api-l526.onrender.com/battleHistory', battleResult);
         const savedBattle = response.data;
         setBattleHistory([...battleHistory, savedBattle]);
         setBattleResult(savedBattle);
@@ -596,7 +596,7 @@ const App = () => {
     try {
       const updatedHistory = battleHistory.filter((battle) => battle.id !== battleId);
       setBattleHistory(updatedHistory);
-      await axios.delete(`http://localhost:3001/battleHistory/${battleId}`);
+      await axios.delete(`https://pokedex-api-l526.onrender.com/battleHistory/${battleId}`);
       Swal.fire({
         title: 'Battle Removed',
         text: 'The battle has been removed from your history.',
@@ -612,7 +612,7 @@ const App = () => {
       });
     } catch (error) {
       console.error('Error removing battle from history:', error.message);
-      setError(`Failed to remove battle from history: ${error.response?.status === 404 ? 'Battle not found.' : error.message}. Ensure json-server is running at http://localhost:3001.`);
+      setError(`Failed to remove battle from history: ${error.response?.status === 404 ? 'Battle not found.' : error.message}. Ensure json-server is running at https://pokedex-api-l526.onrender.com.`);
       setLastFailedAction('removeFromBattleHistory');
       fetchData();
     }
