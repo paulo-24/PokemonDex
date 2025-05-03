@@ -4,11 +4,11 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import debounce from 'lodash.debounce';
 import Swal from 'sweetalert2';
-import PokemonList from './components/PokemonList';
-import PokemonDetails from './components/PokemonDetails';
-import Team from './components/Team';
-import Favorites from './components/Favorites';
-import Battle from './components/Battle';
+import PokemonList from './components/pokemonList';
+import PokemonDetails from './components/pokemonDetails';
+import Team from './components/team';
+import Favorites from './components/favorites';
+import Battle from './components/battle';
 import './App.css';
 
 // Configure axios-retry for all requests
