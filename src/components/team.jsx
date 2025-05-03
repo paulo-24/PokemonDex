@@ -25,8 +25,8 @@ const Team = ({ team, setTeam, setError, setLastFailedAction, setLastFailedPokem
         return;
       }
 
-      console.log(`Sending DELETE request to http://localhost:3001/team/${pokemonId}`);
-      const response = await axios.delete(`http://localhost:3001/team/${pokemonId}`);
+      console.log(`Sending DELETE request to https://pokedex-api-l526.onrender.com/team/${pokemonId}`);
+      const response = await axios.delete(`https://pokedex-api-l526.onrender.comteam/${pokemonId}`);
       console.log('DELETE response:', response.data);
 
       const newTeam = team.filter((pokemon) => pokemon.id !== pokemonId);
@@ -49,7 +49,7 @@ const Team = ({ team, setTeam, setError, setLastFailedAction, setLastFailedPokem
 
       console.log('Resyncing team with server...');
       try {
-        const teamRes = await axios.get('http://localhost:3001/team');
+        const teamRes = await axios.get('https://pokedex-api-l526.onrender.com/team');
         setTeam(teamRes.data || []);
         console.log('Team resynced:', teamRes.data);
       } catch (syncError) {
@@ -65,7 +65,7 @@ const Team = ({ team, setTeam, setError, setLastFailedAction, setLastFailedPokem
 
       console.log('Resyncing team after failed deletion...');
       try {
-        const teamRes = await axios.get('http://localhost:3001/team');
+        const teamRes = await axios.get('https://pokedex-api-l526.onrender.com/team');
         setTeam(teamRes.data || []);
         console.log('Team resynced after error:', teamRes.data);
       } catch (syncError) {
